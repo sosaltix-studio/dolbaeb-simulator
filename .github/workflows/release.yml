@@ -49,7 +49,7 @@ jobs:
         with:
           key: ${{ matrix.target }}
 
-      - name: Install cross (for musl)
+      - name: Install Cross
         if: matrix.target == 'x86_64-unknown-linux-musl'
         run: cargo install cross --git https://github.com/cross-rs/cross
 
@@ -61,7 +61,7 @@ jobs:
             cargo build --release --target ${{ matrix.target }}
           fi
         shell: bash
-
+      
       - name: Verify Linux binary
         if: runner.os == 'Linux'
         run: file target/${{ matrix.target }}/release/dolbaeb-simulator
