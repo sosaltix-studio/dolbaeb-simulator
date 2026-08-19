@@ -21,10 +21,7 @@ jobs:
         include:
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
-            artifact: dolbaeb-simulator-linux-x86_64-glibc
-          - target: x86_64-unknown-linux-musl
-            os: ubuntu-latest
-            artifact: dolbaeb-simulator-linux-x86_64-musl
+            artifact: dolbaeb-simulator-linux-x86_64
           - target: x86_64-pc-windows-msvc
             os: windows-latest
             artifact: dolbaeb-simulator-windows-x86_64.exe
@@ -49,17 +46,8 @@ jobs:
         with:
           key: ${{ matrix.target }}
 
-      - name: Install Cross
-        if: matrix.target == 'x86_64-unknown-linux-musl'
-        run: cargo install cross --git https://github.com/cross-rs/cross
-
       - name: Build release binary
-        run: |
-          if [ "${{ matrix.target }}" = "x86_64-unknown-linux-musl" ]; then
-            cross build --release --target ${{ matrix.target }}
-          else
-            cargo build --release --target ${{ matrix.target }}
-          fi
+        run: cargo build --release --target ${{ matrix.target }}
         shell: bash
       
       - name: Verify Linux binary
