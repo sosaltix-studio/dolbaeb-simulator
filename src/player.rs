@@ -75,6 +75,7 @@ impl Player {
                     ));
                 }
 
+                self.is_attacking = false;
                 self.weapon = picked.weapon;
                 self.ammo = picked.ammo;
 
@@ -89,6 +90,7 @@ impl Player {
                     self.rotation,
                 ));
 
+                self.is_attacking = false;
                 self.weapon = Weapon::Fists;
                 self.ammo = 0;
                 self.torso_anim.set_state(PUNCH_ROW, 1, 1.0);
@@ -250,6 +252,7 @@ impl Player {
         char_die(
             self.pos,
             self.rotation,
+            &mut self.is_attacking,
             &mut self.is_dead,
             &mut self.weapon,
             &mut self.torso_anim,

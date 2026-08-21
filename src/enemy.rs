@@ -283,11 +283,11 @@ impl Enemy {
         }
     }
 
-    // Смерть врага с дропом его оружия
     pub fn die(&mut self, dropped_weapons: &mut Vec<DroppedWeapon>) {
         char_die(
             self.pos,
             self.rotation,
+            &mut self.is_attacking,
             &mut self.is_dead,
             &mut self.weapon,
             &mut self.torso_anim,

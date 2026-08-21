@@ -142,6 +142,7 @@ pub fn restart_char(
 pub fn char_die(
     pos: Vec2,
     rotation: f32,
+    is_atacking: &mut bool,
     is_dead: &mut bool,
     weapon: &mut Weapon,
     torso_anim: &mut AnimationState,
@@ -150,6 +151,7 @@ pub fn char_die(
     if *is_dead {
         return;
     }
+    *is_atacking = false;
     *is_dead = true;
 
     if *weapon != Weapon::Fists && *weapon != Weapon::Dead {
