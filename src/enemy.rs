@@ -31,11 +31,13 @@ pub struct Enemy {
     pub is_dead: bool,
     pub is_moving: bool,
     pub is_attacking: bool,
+    pub is_knock: bool,
     pub state: EnemyState,
     pub patrol_dir: Vec2,
     pub shoot_cooldown: f32,
     pub last_known_pos: Option<Vec2>,
     pub attack_timer: f32,
+    pub knock_timer: f32,
 }
 
 impl Enemy {
@@ -58,11 +60,13 @@ impl Enemy {
             is_dead: false,
             is_moving: false,
             is_attacking: false,
+            is_knock: false,
             state: EnemyState::Patrol,
             patrol_dir: dir,
             shoot_cooldown: 0.0,
             last_known_pos: None,
             attack_timer: 0.0,
+            knock_timer: 0.0,
         }
     }
 
@@ -83,26 +87,65 @@ impl Enemy {
             return;
         }
 
+        if self.is_knock {
+            if !player.is_executing {
+                self.knock_timer -= dt;
+            }
+            self.is_moving = false;
+            self.is_attacking = false;
+
+            if self.knock_timer <= 0.0 {
+                self.is_knock = false;
+                let (row, frames, fps) = self.weapon.anim_info();
+                self.torso_anim.set_state(row, frames, fps);
+            }
+            return;
+        }
+
         let active_map = world_manager.get_active();
         let map_bounds = active_map.bounds();
-
         let dist_to_player = self.pos.distance(player.pos);
-        let is_player_melee = player.weapon != Weapon::Pistol
-            && player.weapon != Weapon::Rifle
-            && player.weapon != Weapon::Dead;
 
-        if player.is_attacking
-            && is_player_melee
-            && dist_to_player < ATACK_RADIUS
-            && is_player_melee
-        {
+        let player_can_hit = player.is_attacking
+            && is_in_attack_sector(player.pos, player.rotation, self.pos, ATACK_RADIUS);
+
+        if player_can_hit {
             match player.weapon {
-                Weapon::Knife => audio.play(&audio.sound_knife),
-                Weapon::Pipe | Weapon::Fists => audio.play(&audio.sound_pipe),
+                Weapon::Fists => {
+                    if !self.is_knock {
+                        self.is_knock = true;
+                        self.knock_timer = 4.0;
+                        self.torso_anim.set_state(STUNNED_ROW, STUNNED_FRAMES, 1.0);
+
+                        if self.weapon != Weapon::Fists && self.weapon != Weapon::Dead {
+                            let ammo = match self.weapon {
+                                Weapon::Pistol => 12,
+                                Weapon::Rifle => 30,
+                                _ => 0,
+                            };
+                            dropped_weapons.push(DroppedWeapon::new(
+                                self.pos,
+                                self.weapon,
+                                ammo,
+                                self.rotation,
+                            ));
+                            self.weapon = Weapon::Fists;
+                        }
+                        return;
+                    }
+                }
+                Weapon::Knife => {
+                    audio.play(&audio.sound_knife);
+                    self.die(dropped_weapons);
+                    return;
+                }
+                Weapon::Pipe => {
+                    audio.play(&audio.sound_pipe);
+                    self.die(dropped_weapons);
+                    return;
+                }
                 _ => {}
             }
-            self.die(dropped_weapons);
-            return;
         }
 
         let sees_player = (dist_to_player < VISION_RADIUS
@@ -181,18 +224,18 @@ impl Enemy {
                     }
                 }
 
-                if self.is_attacking {
-                    if self.attack_timer > 0.0 {
-                        self.attack_timer -= dt;
-                        if self.attack_timer <= 0.0 {
-                            if dist_to_player < ATACK_RADIUS && !player.is_dead {
-                                match self.weapon {
-                                    Weapon::Knife => audio.play(&audio.sound_knife),
-                                    Weapon::Pipe | Weapon::Fists => audio.play(&audio.sound_pipe),
-                                    _ => {}
-                                }
-                                player.die(dropped_weapons);
+                if self.is_attacking && self.attack_timer > 0.0 {
+                    self.attack_timer -= dt;
+                    if self.attack_timer <= 0.0 {
+                        let enemy_can_hit =
+                            is_in_attack_sector(self.pos, self.rotation, player.pos, ATACK_RADIUS);
+                        if enemy_can_hit && !player.is_dead {
+                            match self.weapon {
+                                Weapon::Knife => audio.play(&audio.sound_knife),
+                                Weapon::Pipe | Weapon::Fists => audio.play(&audio.sound_pipe),
+                                _ => {}
                             }
+                            player.die(dropped_weapons);
                         }
                     }
                 }
@@ -295,18 +338,6 @@ impl Enemy {
         );
     }
 
-    pub fn restart(&mut self, pos: Vec2, weapon: Weapon) {
-        restart_char(
-            &mut self.pos,
-            pos,
-            &mut self.is_dead,
-            &mut self.weapon,
-            weapon,
-            &mut self.torso_anim,
-        );
-        self.last_known_pos = None;
-    }
-
     pub fn draw(&self, assets: &Assets) {
         draw_char(
             &assets.enemy,
@@ -316,6 +347,7 @@ impl Enemy {
             &self.torso_anim,
             &self.legs_anim,
             self.is_dead,
+            self.is_knock,
         );
     }
 }

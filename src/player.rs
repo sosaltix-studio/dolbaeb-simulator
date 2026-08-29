@@ -1,5 +1,6 @@
 use crate::assets::Assets;
 use crate::audio::AudioManager;
+use crate::enemy::Enemy;
 use crate::entity::*;
 use crate::objects::{Bullet, BulletOwner, DroppedWeapon, Weapon};
 use crate::tilemap::{TilemapManager, WorldManager};
@@ -20,6 +21,9 @@ pub struct Player {
     pub is_dead: bool,
     pub shoot_cooldown: f32,
     pub atack_timer: f32,
+    pub is_executing: bool,
+    pub execution_orig_pos: Vec2,
+    pub executing_enemy_idx: Option<usize>,
 }
 
 impl Player {
@@ -38,6 +42,9 @@ impl Player {
             ammo: 0,
             shoot_cooldown: 0.0,
             atack_timer: 0.0,
+            is_executing: false,
+            execution_orig_pos: Vec2::ZERO,
+            executing_enemy_idx: None,
         }
     }
 
@@ -54,9 +61,61 @@ impl Player {
         bullets: &mut Vec<Bullet>,
         audio: &AudioManager,
         last_shot_pos: &mut Option<Vec2>,
+        enemies: &mut [Enemy],
     ) {
         if self.is_dead {
             return;
+        }
+
+        if self.is_executing {
+            let animation_finished = self.torso_anim.update(delta_time);
+
+            if animation_finished {
+                if let Some(idx) = self.executing_enemy_idx {
+                    if idx < enemies.len() && !enemies[idx].is_dead {
+                        match self.weapon {
+                            Weapon::Knife => audio.play(&audio.sound_knife),
+                            Weapon::Pipe | Weapon::Fists => audio.play(&audio.sound_pipe),
+                            _ => {}
+                        }
+                        enemies[idx].die(dropped_weapons);
+                    }
+                }
+
+                self.pos = self.execution_orig_pos;
+                self.is_executing = false;
+                self.executing_enemy_idx = None;
+
+                let row = self.weapon.anim_info().0;
+                self.torso_anim.set_state(row, 1, 1.0);
+            }
+            return;
+        }
+
+        if is_key_pressed(KeyCode::Space) && !self.is_attacking {
+            let can_execute = matches!(self.weapon, Weapon::Fists | Weapon::Pipe | Weapon::Knife);
+            if can_execute {
+                if let Some(idx) = enemies.iter().position(|e| {
+                    !e.is_dead && e.is_knock && self.pos.distance(e.pos) <= ATACK_RADIUS
+                }) {
+                    self.is_executing = true;
+                    self.execution_orig_pos = self.pos;
+                    self.executing_enemy_idx = Some(idx);
+
+                    self.pos = enemies[idx].pos;
+                    self.rotation = enemies[idx].rotation;
+
+                    let (exec_row, exec_frames, exec_fps) = match self.weapon {
+                        Weapon::Pipe => (EXECUTE_PIPE_ROW, EXECUTE_PIPE_FRAMES, 10.0),
+                        Weapon::Knife => (EXECUTE_KNIFE_ROW, EXECUTE_KNIFE_FRAMES, 10.0),
+                        Weapon::Fists => (EXECUTE_FISTS_ROW, EXECUTE_FISTS_FRAMES, 12.0),
+                        _ => (PUNCH_ROW, 1, 1.0),
+                    };
+
+                    self.torso_anim.set_state(exec_row, exec_frames, exec_fps);
+                    return;
+                }
+            }
         }
 
         if is_mouse_button_pressed(MouseButton::Right) {
@@ -94,36 +153,6 @@ impl Player {
                 self.weapon = Weapon::Fists;
                 self.ammo = 0;
                 self.torso_anim.set_state(PUNCH_ROW, 1, 1.0);
-            }
-        }
-
-        if !self.is_attacking {
-            let old_weapon = self.weapon;
-
-            if is_key_pressed(KeyCode::Key1) {
-                self.weapon = Weapon::Fists;
-                self.ammo = 0;
-            }
-            if is_key_pressed(KeyCode::Key2) {
-                self.weapon = Weapon::Pipe;
-                self.ammo = 0;
-            }
-            if is_key_pressed(KeyCode::Key3) {
-                self.weapon = Weapon::Knife;
-                self.ammo = 0;
-            }
-            if is_key_pressed(KeyCode::Key4) {
-                self.weapon = Weapon::Pistol;
-                self.ammo = 12;
-            }
-            if is_key_pressed(KeyCode::Key5) {
-                self.weapon = Weapon::Rifle;
-                self.ammo = 30;
-            }
-
-            if self.weapon != old_weapon {
-                let row = self.weapon.anim_info().0;
-                self.torso_anim.set_state(row, 1, 1.0);
             }
         }
 
@@ -238,10 +267,15 @@ impl Player {
 
     pub fn restart(&mut self, pos: Vec2) {
         let weapon = Weapon::Fists;
+        self.is_executing = false;
+        self.execution_orig_pos = Vec2::ZERO;
+        self.executing_enemy_idx = None;
+
         restart_char(
             &mut self.pos,
             pos,
             &mut self.is_dead,
+            &mut self.is_attacking,
             &mut self.weapon,
             weapon,
             &mut self.torso_anim,
@@ -270,6 +304,7 @@ impl Player {
             &self.torso_anim,
             &self.legs_anim,
             self.is_dead,
+            false,
         );
     }
 }

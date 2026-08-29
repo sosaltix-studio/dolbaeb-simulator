@@ -20,8 +20,8 @@ pub struct Level {
     pub exit_trigger: Rect,
     pub next_map: Option<MapId>,
     pub next_player_pos: Vec2,
-    pub requires_all_enemies_dead: bool,
-    pub requires_phone_read: bool,
+    //pub requires_all_enemies_dead: bool,
+    //pub requires_phone_read: bool,
 }
 
 impl Level {
@@ -29,18 +29,18 @@ impl Level {
         match map_id {
             MapId::House => Level {
                 map_id: MapId::House,
-                player_start: vec2(650.0, 650.0),
+                player_start: vec2(600.0, 600.0),
                 enemies: vec![],
                 dropped_weapons: vec![],
-                exit_trigger: Rect::new(0.0, 0.0, 300.0, 50.0),
+                exit_trigger: Rect::new(0.0, 0.0, 350.0, 50.0),
                 next_map: Some(MapId::Level1_1),
-                next_player_pos: vec2(80.0, 350.0),
-                requires_all_enemies_dead: false,
-                requires_phone_read: true,
+                next_player_pos: vec2(88.0, 528.0),
+                //requires_all_enemies_dead: false,
+                //requires_phone_read: true,
             },
             MapId::Level1_1 => Level {
                 map_id: MapId::Level1_1,
-                player_start: vec2(80.0, 350.0),
+                player_start: vec2(88.0, 528.0),
                 enemies: vec![
                     Enemy::new(vec2(380.0, 960.0), Weapon::Pipe, vec2(1.0, 0.0)),
                     Enemy::new(vec2(600.0, 400.0), Weapon::Knife, vec2(0.0, 1.0)),
@@ -55,13 +55,13 @@ impl Level {
                 dropped_weapons: vec![DroppedWeapon::new(vec2(250.0, 200.0), Weapon::Pipe, 0, 0.0)],
                 exit_trigger: Rect::new(750.0, 100.0, 80.0, 80.0),
                 next_map: Some(MapId::Level1_2),
-                next_player_pos: vec2(100.0, 100.0),
-                requires_all_enemies_dead: true,
-                requires_phone_read: false,
+                next_player_pos: vec2(91.0, 91.0),
+                //requires_all_enemies_dead: true,
+                //requires_phone_read: false,
             },
             MapId::Level1_2 => Level {
                 map_id: MapId::Level1_2,
-                player_start: vec2(100.0, 100.0),
+                player_start: vec2(88.0, 528.0),
                 enemies: vec![
                     Enemy::new(vec2(300.0, 200.0), Weapon::Pistol, vec2(0.0, 1.0)),
                     Enemy::new(vec2(500.0, 200.0), Weapon::Pipe, vec2(-1.0, 0.0)),
@@ -70,8 +70,8 @@ impl Level {
                 exit_trigger: Rect::new(80.0, 80.0, 80.0, 80.0),
                 next_map: Some(MapId::Level2_1),
                 next_player_pos: vec2(100.0, 100.0),
-                requires_all_enemies_dead: true,
-                requires_phone_read: false,
+                //requires_all_enemies_dead: true,
+                //requires_phone_read: false,
             },
             MapId::Level2_1 => Level {
                 map_id: MapId::Level2_1,
@@ -89,8 +89,8 @@ impl Level {
                 exit_trigger: Rect::new(750.0, 100.0, 80.0, 80.0),
                 next_map: Some(MapId::Level2_2),
                 next_player_pos: vec2(100.0, 100.0),
-                requires_all_enemies_dead: true,
-                requires_phone_read: false,
+                //requires_all_enemies_dead: true,
+                //requires_phone_read: false,
             },
             MapId::Level2_2 => Level {
                 map_id: MapId::Level2_2,
@@ -104,8 +104,8 @@ impl Level {
                 exit_trigger: Rect::new(80.0, 80.0, 80.0, 80.0),
                 next_map: None,
                 next_player_pos: vec2(0.0, 0.0),
-                requires_all_enemies_dead: true,
-                requires_phone_read: false,
+                //requires_all_enemies_dead: true,
+                //requires_phone_read: false,
             },
         }
     }

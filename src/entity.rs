@@ -6,7 +6,7 @@ use macroquad::prelude::*;
 
 // Настройка спрайтов и смещения центра
 pub const SPRITE_SIZE: f32 = 48.0;
-pub const SCALE: f32 = 2.4;
+pub const SCALE: f32 = 2.2;
 pub const SCALED_SIZE: f32 = SPRITE_SIZE * SCALE;
 
 // Сдвиг текстур (тайлсет кривой что пиздец)
@@ -36,14 +36,26 @@ pub const RIFLE_FRAMES: usize = 2;
 
 // Ноги
 pub const LEGS_ROW: usize = 5;
-pub const LEGS_FRAMES: usize = 7;
+pub const LEGS_FRAMES: usize = 14;
 
 pub const DEAD_ROW: usize = 6;
 pub const DEAD_FRAMES: usize = 1;
 
+pub const STUNNED_ROW: usize = 7;
+pub const STUNNED_FRAMES: usize = 1;
+
+pub const EXECUTE_PIPE_ROW: usize = 7;
+pub const EXECUTE_PIPE_FRAMES: usize = 6;
+
+pub const EXECUTE_FISTS_ROW: usize = 8;
+pub const EXECUTE_FISTS_FRAMES: usize = 10;
+
+pub const EXECUTE_KNIFE_ROW: usize = 9;
+pub const EXECUTE_KNIFE_FRAMES: usize = 5;
+
 pub const ATACK_RADIUS: f32 = 100.0;
-pub const RIFLE_CD: f32 = 0.2;
-pub const PISTOL_CD: f32 = 0.6;
+pub const RIFLE_CD: f32 = 0.1;
+pub const PISTOL_CD: f32 = 0.5;
 pub const MELEE_ATACK_TIME: f32 = 0.2;
 
 // Структура анимаций
@@ -128,12 +140,14 @@ pub fn restart_char(
     current_pos: &mut Vec2,
     pos: Vec2,
     is_dead: &mut bool,
+    is_atacking: &mut bool,
     current_weapon: &mut Weapon,
     weapon: Weapon,
     torso_anim: &mut AnimationState,
 ) {
     *current_pos = pos;
     *is_dead = false;
+    *is_atacking = false;
     *current_weapon = weapon;
     let (row, frames, fps) = current_weapon.anim_info();
     torso_anim.set_state(row, frames, fps);
@@ -170,6 +184,22 @@ pub fn char_die(
     torso_anim.set_state(row, frames, fps);
 }
 
+pub fn is_in_attack_sector(
+    attacker_pos: Vec2,
+    attacker_rot: f32,
+    target_pos: Vec2,
+    max_dist: f32,
+) -> bool {
+    let to_target = target_pos - attacker_pos;
+    let dist = to_target.length();
+    if dist > max_dist || dist < 0.001 {
+        return false;
+    }
+    let forward = vec2(attacker_rot.cos(), attacker_rot.sin());
+    let dir = to_target / dist;
+    forward.dot(dir) >= 0.0
+}
+
 pub fn draw_char(
     texture: &Texture2D,
     pos: Vec2,
@@ -178,12 +208,13 @@ pub fn draw_char(
     torso_anim: &AnimationState,
     legs_anim: &AnimationState,
     is_dead: bool,
+    is_knock: bool,
 ) {
     let half_scaled_size = SCALED_SIZE / 2.0;
     let visual_offset = vec2(SPRITE_OFFSET_X * SCALE, SPRITE_OFFSET_Y * SCALE);
 
     // Ноги
-    if !is_dead {
+    if !is_dead && !is_knock {
         let legs_src_x = legs_anim.current_frame as f32 * SPRITE_SIZE;
         let legs_src_y = legs_anim.row_index * SPRITE_SIZE;
 

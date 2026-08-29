@@ -30,6 +30,8 @@ mod entity;
 
 mod audio;
 
+const SCALE: f32 = 2.2;
+
 fn window_conf() -> Conf {
     Conf {
         window_title: "Dolbaeb Simulator".to_string(),
@@ -45,7 +47,7 @@ fn window_conf() -> Conf {
 async fn main() {
     // Загрузка текстур
     let assets = assets::Assets::load();
-    let mut world_manager = tilemap::WorldManager::init(2.4);
+    let mut world_manager = tilemap::WorldManager::init(SCALE);
 
     let mut audio = audio::AudioManager::load().await;
 
@@ -54,7 +56,7 @@ async fn main() {
     camera.zoom = vec2(2.0 / screen_width(), 2.0 / screen_height());
 
     // Инициализация игрока
-    let player_start_pos = vec2(650.0, 650.0);
+    let player_start_pos = vec2(0.0, 0.0);
     let mut player = Player::new(player_start_pos, 300.0);
 
     // Спавн телефона
@@ -284,6 +286,7 @@ async fn main() {
                         &mut bullets,
                         &audio,
                         &mut last_shot_pos,
+                        &mut enemies,
                     );
 
                     player.update_rotation(&camera);
