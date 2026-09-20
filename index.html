@@ -2,7 +2,8 @@
 
 <head>
     <meta charset="utf-8">
-    <title>TITLE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Dolbaeb Simulator</title>
     <style>
         html,
         body,
@@ -15,18 +16,70 @@
             position: absolute;
             background: black;
             z-index: 0;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        #mobile-unsupported-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0d0d0d;
+            color: #ffffff;
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #mobile-unsupported-overlay h2 {
+            margin-bottom: 12px;
+            font-size: 22px;
+            color: #ff4d4d;
+        }
+
+        #mobile-unsupported-overlay p {
+            font-size: 16px;
+            color: #ccc;
+            max-width: 400px;
+            line-height: 1.4;
         }
     </style>
 </head>
 
 <body>
+    <div id="mobile-unsupported-overlay">
+        <h2>Мобильные устройства не поддерживаются</h2>
+        <p>К сожалению, игра пока недоступна на мобильных платформах. Пожалуйста, зайдите с компьютера.</p>
+    </div>
+
     <canvas id="glcanvas" tabindex='1'></canvas>
     <script src="mq_js_bundle.js"></script>
     <script>
         document.addEventListener('contextmenu', function (event) {
             event.preventDefault();
         });
-        load("./dolbaeb-simulator.wasm");
+
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                   (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
+        }
+
+        if (isMobileDevice()) {
+            document.getElementById('mobile-unsupported-overlay').style.display = 'flex';
+            document.getElementById('glcanvas').style.display = 'none';
+        } else {
+            load("./dolbaeb-simulator.wasm");
+        }
     </script> 
 </body>
 

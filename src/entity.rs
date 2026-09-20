@@ -1,12 +1,21 @@
+use crate::SCALE;
 use crate::{
     objects::{DroppedWeapon, Weapon},
     tilemap::TilemapManager,
 };
 use macroquad::prelude::*;
 
+pub const PLAYER_SPEED: f32 = 400.0;
+pub const ENEMY_SPEED: f32 = 300.0;
+
+pub const MOVE_WIDHT: f32 = 24.0;
+pub const MOVE_HEIGHT: f32 = 24.0;
+
+pub const DAMAGE_WIDHT: f32 = 32.0;
+pub const DAMAGE_HEIGHT: f32 = 32.0;
+
 // Настройка спрайтов и смещения центра
 pub const SPRITE_SIZE: f32 = 48.0;
-pub const SCALE: f32 = 2.2;
 pub const SCALED_SIZE: f32 = SPRITE_SIZE * SCALE;
 
 // Сдвиг текстур (тайлсет кривой что пиздец)
@@ -48,15 +57,15 @@ pub const EXECUTE_PIPE_ROW: usize = 7;
 pub const EXECUTE_PIPE_FRAMES: usize = 6;
 
 pub const EXECUTE_FISTS_ROW: usize = 8;
-pub const EXECUTE_FISTS_FRAMES: usize = 10;
+pub const EXECUTE_FISTS_FRAMES: usize = 12;
 
 pub const EXECUTE_KNIFE_ROW: usize = 9;
 pub const EXECUTE_KNIFE_FRAMES: usize = 5;
 
-pub const ATACK_RADIUS: f32 = 100.0;
+pub const ATTACK_RADIUS: f32 = 100.0;
 pub const RIFLE_CD: f32 = 0.1;
-pub const PISTOL_CD: f32 = 0.5;
-pub const MELEE_ATACK_TIME: f32 = 0.2;
+pub const PISTOL_CD: f32 = 0.3;
+pub const MELEE_ATTACK_TIME: f32 = 0.2;
 
 // Структура анимаций
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -113,50 +122,45 @@ impl AnimationState {
     }
 }
 
-pub fn get_collider(pos: &Vec2) -> Rect {
-    let width = 36.0;
-    let height = 36.0;
-    Rect::new(pos.x - width / 2.0, pos.y, width, height)
+pub fn get_move_collider(pos: &Vec2) -> Rect {
+    Rect::new(
+        pos.x - MOVE_WIDHT / 2.0,
+        pos.y - MOVE_HEIGHT / 2.0,
+        MOVE_WIDHT,
+        MOVE_HEIGHT,
+    )
 }
 
-pub fn move_char(pos: &mut Vec2, delta: Vec2, active_map: &TilemapManager) {
-    if delta == Vec2::ZERO {
+pub fn get_damage_collider(pos: &Vec2) -> Rect {
+    Rect::new(
+        pos.x - DAMAGE_WIDHT / 2.0,
+        pos.y - DAMAGE_HEIGHT / 2.0,
+        DAMAGE_WIDHT,
+        DAMAGE_HEIGHT,
+    )
+}
+
+pub fn move_char(pos: &mut Vec2, move_vec: Vec2, active_map: &TilemapManager) {
+    if move_vec == Vec2::ZERO {
         return;
     }
     let old_x = pos.x;
-    pos.x += delta.x;
-    if active_map.check_collision(get_collider(pos)) {
+    pos.x += move_vec.x;
+    if active_map.check_collision(get_move_collider(pos)) {
         pos.x = old_x;
     }
 
     let old_y = pos.y;
-    pos.y += delta.y;
-    if active_map.check_collision(get_collider(pos)) {
+    pos.y += move_vec.y;
+    if active_map.check_collision(get_move_collider(pos)) {
         pos.y = old_y;
     }
-}
-
-pub fn restart_char(
-    current_pos: &mut Vec2,
-    pos: Vec2,
-    is_dead: &mut bool,
-    is_atacking: &mut bool,
-    current_weapon: &mut Weapon,
-    weapon: Weapon,
-    torso_anim: &mut AnimationState,
-) {
-    *current_pos = pos;
-    *is_dead = false;
-    *is_atacking = false;
-    *current_weapon = weapon;
-    let (row, frames, fps) = current_weapon.anim_info();
-    torso_anim.set_state(row, frames, fps);
 }
 
 pub fn char_die(
     pos: Vec2,
     rotation: f32,
-    is_atacking: &mut bool,
+    is_attacking: &mut bool,
     is_dead: &mut bool,
     weapon: &mut Weapon,
     torso_anim: &mut AnimationState,
@@ -165,7 +169,7 @@ pub fn char_die(
     if *is_dead {
         return;
     }
-    *is_atacking = false;
+    *is_attacking = false;
     *is_dead = true;
 
     if *weapon != Weapon::Fists && *weapon != Weapon::Dead {

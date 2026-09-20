@@ -176,7 +176,7 @@ impl DroppedWeapon {
         );
     }
 }
-
+// Телефон пока не используется (и не планируется на самом деле)
 // Структура телефона
 pub struct Phone {
     pub charge: f32,
@@ -184,18 +184,24 @@ pub struct Phone {
 }
 
 impl Phone {
-    // Обновление
-    pub fn update(&mut self, delta_time: f32) {
-        self.charge = (self.charge - 0.2 * delta_time).max(0.0);
-
-        if is_key_pressed(KeyCode::Q) {
-            self.is_get = !self.is_get;
+    pub fn new() -> Self {
+        Self {
+            charge: 100.0,
+            is_get: false,
         }
     }
 
+    // Обновление
+    pub fn update(&mut self, dt: f32) {
+        //self.charge = (self.charge - 0.2 * dt).max(0.0);
+
+        //if is_key_pressed(KeyCode::Q) {
+        //    self.is_get = !self.is_get;
+        //}
+    }
+
     // Отрисовка
-    pub fn draw(&self, assets: &Assets, font_idx: usize) {
-        let current_font = assets.get_font(font_idx);
+    pub fn draw(&self, assets: &Assets) {
         if self.is_get {
             draw_texture_ex(
                 &assets.phone,
@@ -212,7 +218,7 @@ impl Phone {
                 155.0,
                 screen_height() - 345.0,
                 TextParams {
-                    font: Some(current_font),
+                    font: Some(&assets.font),
                     font_size: 16,
                     color: WHITE,
                     ..Default::default()

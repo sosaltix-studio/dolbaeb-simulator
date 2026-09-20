@@ -49,11 +49,7 @@ impl AudioManager {
         }
     }
 
-    pub fn volume_percent(&self) -> f32 {
-        (self.volume * 100.0).round() as f32
-    }
-
-    pub fn change_volume(&mut self, delta: f32) {
-        self.volume = (self.volume + delta).clamp(0.0, 1.0);
+    pub fn set_volume(&mut self, volume: f32) {
+        self.volume = volume.clamp(0.0, 1.0);
     }
 }

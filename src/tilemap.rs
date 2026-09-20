@@ -1,3 +1,4 @@
+use crate::SCALE;
 use macroquad::prelude::*;
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;
@@ -106,7 +107,7 @@ impl TilemapManager {
                 }
 
                 if is_near_wall {
-                    cost_map[idx] = 10;
+                    cost_map[idx] = 2;
                 }
             }
         }
@@ -145,35 +146,59 @@ impl TilemapManager {
         let start_idx = target_y * self.grid_width + target_x;
 
         self.distance_map[start_idx] = 0;
-        heap.push(Reverse((0u16, target_x, target_y)));
+        heap.push(Reverse((0u32, target_x, target_y)));
+
+        let neighbors: [(isize, isize, u32); 8] = [
+            (-1, 0, 10),
+            (1, 0, 10),
+            (0, -1, 10),
+            (0, 1, 10),
+            (-1, -1, 14),
+            (1, -1, 14),
+            (-1, 1, 14),
+            (1, 1, 14),
+        ];
+
         while let Some(Reverse((dist, x, y))) = heap.pop() {
             let curr_idx = y * self.grid_width + x;
-            if dist > self.distance_map[curr_idx] {
+            if dist > self.distance_map[curr_idx] as u32 {
                 continue;
             }
 
-            let neighbors = [
-                (x.wrapping_sub(1), y),
-                (x + 1, y),
-                (x, y.wrapping_sub(1)),
-                (x, y + 1),
-            ];
+            for (dx, dy, move_cost) in neighbors {
+                let nx = x as isize + dx;
+                let ny = y as isize + dy;
 
-            for (nx, ny) in neighbors {
-                if nx < self.grid_width && ny < self.grid_height {
-                    let n_idx = ny * self.grid_width + nx;
-                    let tile_cost = self.cost_map[n_idx];
+                if nx >= 0
+                    && nx < self.grid_width as isize
+                    && ny >= 0
+                    && ny < self.grid_height as isize
+                {
+                    let unx = nx as usize;
+                    let uny = ny as usize;
 
-                    if tile_cost != u16::MAX {
-                        let new_dist = dist.saturating_add(tile_cost);
-                        if new_dist < self.distance_map[n_idx] {
-                            self.distance_map[n_idx] = new_dist;
-                            heap.push(Reverse((new_dist, nx, ny)));
+                    if dx != 0 && dy != 0 {
+                        let wall1 = (y as usize) * self.grid_width + unx;
+                        let wall2 = uny * self.grid_width + (x as usize);
+                        if self.collision_grid[wall1] || self.collision_grid[wall2] {
+                            continue;
+                        }
+                    }
+
+                    let n_idx = uny * self.grid_width + unx;
+                    let tile_cost = self.cost_map[n_idx] as u32;
+
+                    if tile_cost != u16::MAX as u32 {
+                        let new_dist = dist.saturating_add(tile_cost * move_cost);
+                        if new_dist < self.distance_map[n_idx] as u32 {
+                            self.distance_map[n_idx] = new_dist.min(u16::MAX as u32) as u16;
+                            heap.push(Reverse((new_dist, unx, uny)));
                         }
                     }
                 }
             }
         }
+
         for y in 0..self.grid_height {
             for x in 0..self.grid_width {
                 let idx = y * self.grid_width + x;
@@ -222,6 +247,7 @@ impl TilemapManager {
             }
         }
     }
+
     pub fn get_flow_direction(&self, world_pos: Vec2) -> Vec2 {
         if self.collision_grid.is_empty() {
             return Vec2::ZERO;
@@ -359,7 +385,7 @@ impl WorldManager {
     pub fn switch_to(&mut self, map_id: MapId) {
         let idx = map_id as usize;
         if self.maps[idx].is_none() {
-            self.maps[idx] = Some(TilemapManager::load(&CONFIGS[idx], 2.4));
+            self.maps[idx] = Some(TilemapManager::load(&CONFIGS[idx], SCALE));
         }
 
         self.current_map = map_id;
