@@ -34,6 +34,8 @@ mod camera;
 
 mod logs;
 
+mod level;
+
 const SCALE: f32 = 2.2;
 
 fn window_conf() -> Conf {
