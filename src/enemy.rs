@@ -229,10 +229,7 @@ impl Enemy {
         if sees_player {
             self.reaction_timer = (self.reaction_timer - dt).max(0.0);
             self.last_known_pos = Some(player.pos);
-            self.state = match self.weapon {
-                Weapon::Pistol | Weapon::Rifle => EnemyState::RangedChase,
-                _ => EnemyState::MeleeChase,
-            };
+            self.chase_state();
         } else {
             self.reaction_timer = REACTION_TIME;
             if let Some(target) = self.last_known_pos {
@@ -240,10 +237,7 @@ impl Enemy {
                     self.last_known_pos = None;
                     self.state = EnemyState::Patrol;
                 } else {
-                    self.state = match self.weapon {
-                        Weapon::Pistol | Weapon::Rifle => EnemyState::RangedChase,
-                        _ => EnemyState::MeleeChase,
-                    };
+                    self.chase_state();
                 }
             } else {
                 self.state = EnemyState::Patrol;
@@ -460,6 +454,13 @@ impl Enemy {
         self.pos.y = self.pos.y.clamp(0.0, bounds.h);
     }
 
+    pub fn chase_state(&mut self) {
+        self.state = match self.weapon {
+            Weapon::Rifle | Weapon::Pistol => EnemyState::RangedChase,
+            _ => EnemyState::MeleeChase,
+        }
+    }
+
     pub fn die(&mut self, dropped_weapons: &mut Vec<DroppedWeapon>) {
         char_die(
             self.pos,
@@ -493,10 +494,7 @@ pub fn alert_enemies(enemies: &mut [Enemy], shot_pos: &Vec2) {
             if enemy.pos.distance(*shot_pos) <= SOUND_RADIUS {
                 enemy.last_known_pos = Some(*shot_pos);
                 if enemy.state == EnemyState::Patrol {
-                    enemy.state = match enemy.weapon {
-                        Weapon::Pistol | Weapon::Rifle => EnemyState::RangedChase,
-                        _ => EnemyState::MeleeChase,
-                    };
+                    enemy.chase_state();
                 }
             }
         }

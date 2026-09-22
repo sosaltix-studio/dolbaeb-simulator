@@ -13,8 +13,6 @@ pub struct Level {
     pub exit_trigger: Rect,
     pub next_map: Option<MapId>,
     pub next_player_pos: Vec2,
-    //pub requires_all_enemies_dead: bool,
-    //pub requires_phone_read: bool,
 }
 
 impl Level {
@@ -28,8 +26,6 @@ impl Level {
                 exit_trigger: Rect::new(0.0, 0.0, 350.0, 50.0),
                 next_map: Some(MapId::Level1_1),
                 next_player_pos: vec2(88.0, 528.0),
-                //requires_all_enemies_dead: false,
-                //requires_phone_read: true,
             },
             MapId::Level1_1 => Level {
                 map_id: MapId::Level1_1,
@@ -54,8 +50,6 @@ impl Level {
                 exit_trigger: Rect::new(750.0, 100.0, 80.0, 80.0),
                 next_map: Some(MapId::Level1_2),
                 next_player_pos: vec2(91.0, 91.0),
-                //requires_all_enemies_dead: true,
-                //requires_phone_read: false,
             },
             MapId::Level1_2 => Level {
                 map_id: MapId::Level1_2,
@@ -68,8 +62,6 @@ impl Level {
                 exit_trigger: Rect::new(80.0, 80.0, 80.0, 80.0),
                 next_map: Some(MapId::Level2_1),
                 next_player_pos: vec2(100.0, 100.0),
-                //requires_all_enemies_dead: true,
-                //requires_phone_read: false,
             },
             MapId::Level2_1 => Level {
                 map_id: MapId::Level2_1,
@@ -87,8 +79,6 @@ impl Level {
                 exit_trigger: Rect::new(750.0, 100.0, 80.0, 80.0),
                 next_map: Some(MapId::Level2_2),
                 next_player_pos: vec2(100.0, 100.0),
-                //requires_all_enemies_dead: true,
-                //requires_phone_read: false,
             },
             MapId::Level2_2 => Level {
                 map_id: MapId::Level2_2,
@@ -102,8 +92,6 @@ impl Level {
                 exit_trigger: Rect::new(80.0, 80.0, 80.0, 80.0),
                 next_map: None,
                 next_player_pos: vec2(0.0, 0.0),
-                //requires_all_enemies_dead: true,
-                //requires_phone_read: false,
             },
         }
     }
@@ -116,34 +104,8 @@ pub fn handle_location_switch(
     enemies: &mut Vec<Enemy>,
     dropped_weapons: &mut Vec<DroppedWeapon>,
     bullets: &mut Vec<Bullet>,
-    //phone_read: bool,
-    //state: &mut GameState,
-    //status_msg: &mut Option<(&'static str, f32)>,
 ) {
-    //if is_key_pressed(KeyCode::Space) {
     if current_level.exit_trigger.contains(player.pos) {
-        /*
-        if current_level.requires_phone_read && !phone_read {
-            *status_msg = Some(("Неготово пока нихуя...", 2.0));
-            return;
-        }
-
-        if current_level.requires_all_enemies_dead && !enemies.is_empty() {
-            *status_msg = Some(("Зачисти уровень!", 2.0));
-            return;
-        }
-
-        if current_level.map_id == MapId::AutoService_2 {
-            *state = GameState::ArrestCutscene;
-            return;
-        }
-
-        if current_level.map_id == MapId::PoliceStation_2 {
-            *state = GameState::DemoCompleted;
-            return;
-        }
-        */
-
         if let Some(next_map) = current_level.next_map {
             let target_pos = current_level.next_player_pos;
             *current_level = Level::get(next_map);
@@ -155,5 +117,4 @@ pub fn handle_location_switch(
             bullets.clear();
         }
     }
-    //}
 }

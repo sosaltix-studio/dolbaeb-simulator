@@ -8,10 +8,10 @@ use macroquad::prelude::*;
 pub const PLAYER_SPEED: f32 = 400.0;
 pub const ENEMY_SPEED: f32 = 300.0;
 
-pub const MOVE_WIDHT: f32 = 24.0;
+pub const MOVE_WIDTH: f32 = 24.0;
 pub const MOVE_HEIGHT: f32 = 24.0;
 
-pub const DAMAGE_WIDHT: f32 = 32.0;
+pub const DAMAGE_WIDTH: f32 = 32.0;
 pub const DAMAGE_HEIGHT: f32 = 32.0;
 
 // Настройка спрайтов и смещения центра
@@ -44,22 +44,22 @@ pub const RIFLE_ROW: usize = 4;
 pub const RIFLE_FRAMES: usize = 2;
 
 // Ноги
-pub const LEGS_ROW: usize = 5;
+pub const LEGS_ROW: usize = 6;
 pub const LEGS_FRAMES: usize = 14;
 
-pub const DEAD_ROW: usize = 6;
+pub const DEAD_ROW: usize = 7;
 pub const DEAD_FRAMES: usize = 1;
 
-pub const STUNNED_ROW: usize = 7;
+pub const STUNNED_ROW: usize = 8;
 pub const STUNNED_FRAMES: usize = 1;
 
-pub const EXECUTE_PIPE_ROW: usize = 7;
+pub const EXECUTE_PIPE_ROW: usize = 8;
 pub const EXECUTE_PIPE_FRAMES: usize = 6;
 
-pub const EXECUTE_FISTS_ROW: usize = 8;
+pub const EXECUTE_FISTS_ROW: usize = 9;
 pub const EXECUTE_FISTS_FRAMES: usize = 12;
 
-pub const EXECUTE_KNIFE_ROW: usize = 9;
+pub const EXECUTE_KNIFE_ROW: usize = 10;
 pub const EXECUTE_KNIFE_FRAMES: usize = 5;
 
 pub const ATTACK_RADIUS: f32 = 100.0;
@@ -124,18 +124,18 @@ impl AnimationState {
 
 pub fn get_move_collider(pos: &Vec2) -> Rect {
     Rect::new(
-        pos.x - MOVE_WIDHT / 2.0,
+        pos.x - MOVE_WIDTH / 2.0,
         pos.y - MOVE_HEIGHT / 2.0,
-        MOVE_WIDHT,
+        MOVE_WIDTH,
         MOVE_HEIGHT,
     )
 }
 
 pub fn get_damage_collider(pos: &Vec2) -> Rect {
     Rect::new(
-        pos.x - DAMAGE_WIDHT / 2.0,
+        pos.x - DAMAGE_WIDTH / 2.0,
         pos.y - DAMAGE_HEIGHT / 2.0,
-        DAMAGE_WIDHT,
+        DAMAGE_WIDTH,
         DAMAGE_HEIGHT,
     )
 }

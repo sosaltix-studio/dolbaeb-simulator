@@ -80,14 +80,12 @@ pub struct GameInput {
     pub toggle_lock_on: bool,
     pub menu_up: bool,
     pub menu_down: bool,
-    pub menu_left: bool,
-    pub menu_right: bool,
     pub menu_del: bool,
     pub menu_ent: bool,
     pub pause_pressed: bool,
     pub look_around: bool,
     pub restart_pressed: bool,
-    pub debug_toggl_effect: bool,
+    pub debug_toggle_effect: bool,
 }
 
 pub fn collect_input(camera: &Camera2D) -> GameInput {
@@ -125,13 +123,11 @@ fn collect_pc_input(camera: &Camera2D) -> GameInput {
         toggle_lock_on: is_mouse_button_pressed(MouseButton::Middle),
         menu_up: is_key_pressed(KeyCode::Up),
         menu_down: is_key_pressed(KeyCode::Down),
-        menu_left: is_key_pressed(KeyCode::Left),
-        menu_right: is_key_pressed(KeyCode::Right),
         menu_del: is_key_pressed(KeyCode::Backspace),
         menu_ent: is_key_pressed(KeyCode::Enter),
         pause_pressed: is_key_pressed(KeyCode::Escape),
         look_around: is_key_down(KeyCode::LeftShift) || is_key_down(KeyCode::RightShift),
         restart_pressed: is_key_pressed(KeyCode::R),
-        debug_toggl_effect: is_key_pressed(KeyCode::T),
+        debug_toggle_effect: is_key_pressed(KeyCode::T),
     }
 }

@@ -27,6 +27,14 @@ impl Weapon {
             Weapon::Dead => (DEAD_ROW, DEAD_FRAMES, 14.0),
         }
     }
+
+    pub fn default_ammo(&self) -> u32 {
+        match *self {
+            Weapon::Rifle => 30,
+            Weapon::Pistol => 12,
+            _ => 0,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -174,56 +182,5 @@ impl DroppedWeapon {
                 ..Default::default()
             },
         );
-    }
-}
-// Телефон пока не используется (и не планируется на самом деле)
-// Структура телефона
-pub struct Phone {
-    pub charge: f32,
-    pub is_get: bool,
-}
-
-impl Phone {
-    pub fn new() -> Self {
-        Self {
-            charge: 100.0,
-            is_get: false,
-        }
-    }
-
-    // Обновление
-    pub fn update(&mut self, dt: f32) {
-        //self.charge = (self.charge - 0.2 * dt).max(0.0);
-
-        //if is_key_pressed(KeyCode::Q) {
-        //    self.is_get = !self.is_get;
-        //}
-    }
-
-    // Отрисовка
-    pub fn draw(&self, assets: &Assets) {
-        if self.is_get {
-            draw_texture_ex(
-                &assets.phone,
-                60.0,
-                screen_height() - 363.0,
-                WHITE,
-                DrawTextureParams {
-                    dest_size: Some(vec2(128.0, 256.0)),
-                    ..Default::default()
-                },
-            );
-            draw_text_ex(
-                &format!("{:.0}%", self.charge),
-                155.0,
-                screen_height() - 345.0,
-                TextParams {
-                    font: Some(&assets.font),
-                    font_size: 16,
-                    color: WHITE,
-                    ..Default::default()
-                },
-            );
-        }
     }
 }

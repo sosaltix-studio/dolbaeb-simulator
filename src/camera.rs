@@ -34,12 +34,6 @@ impl CameraManager {
         }
     }
 
-    pub fn add_shake(&mut self, intensity: f32, duration: f32) {
-        self.shake_intensity = intensity;
-        self.shake_duration = duration;
-        self.shake_timer = duration;
-    }
-
     pub fn set_story_effect(&mut self, active: bool) {
         self.story_effect_active = active;
         self.trip_effect.toggle(active);

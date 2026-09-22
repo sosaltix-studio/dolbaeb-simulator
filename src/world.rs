@@ -5,35 +5,17 @@ use crate::camera::CameraManager;
 use crate::enemy::{Enemy, alert_enemies};
 use crate::input::{GameInput, VirtualCursor, collect_input};
 use crate::level::{Level, handle_location_switch};
-use crate::objects::{Bullet, DroppedWeapon, Phone, update_bullets};
+use crate::objects::{Bullet, DroppedWeapon, update_bullets};
 use crate::player::Player;
 use crate::tilemap::{MapId, WorldManager};
 use crate::ui::{GameState, UiManager, draw_cursor, draw_dead_menu, draw_ui};
 use macroquad::prelude::*;
-
-pub struct World {
-    pub current_level: Level,
-    pub player: Player,
-    pub enemies: Vec<Enemy>,
-    pub bullets: Vec<Bullet>,
-    pub dropped_weapons: Vec<DroppedWeapon>,
-    pub phone: Phone,
-    pub last_shot_pos: Option<Vec2>,
-}
-
-pub struct Services {
-    pub assets: Assets,
-    pub audio: AudioManager,
-    pub camera: CameraManager,
-    pub ui: UiManager,
-}
 
 pub struct Game {
     pub assets: Assets,
     pub world_manager: WorldManager,
     pub audio_manager: AudioManager,
     pub player: Player,
-    pub phone: Phone,
     pub enemies: Vec<Enemy>,
     pub current_level: Level,
     pub bullets: Vec<Bullet>,
@@ -56,7 +38,6 @@ impl Game {
             world_manager: WorldManager::init(SCALE),
             audio_manager: AudioManager::load().await,
             player,
-            phone: Phone::new(),
             enemies: current_level.enemies.clone(),
             current_level,
             bullets: Vec::with_capacity(128),
@@ -111,7 +92,7 @@ impl Game {
             self.ui_manager.draw(&self.assets);
         } else {
             if self.ui_manager.game_state == GameState::Playing {
-                if self.input.debug_toggl_effect {
+                if self.input.debug_toggle_effect {
                     self.camera_manager.toggle_story_effect();
                 }
 
@@ -145,8 +126,6 @@ impl Game {
                     &mut self.dropped_weapons,
                     dt,
                 );
-
-                self.phone.update(dt);
 
                 for enemy in &mut self.enemies {
                     enemy.update(
@@ -196,7 +175,6 @@ impl Game {
             set_default_camera();
 
             draw_ui(&self.assets, &self.player);
-            self.phone.draw(&self.assets);
 
             if self.player.is_dead {
                 draw_dead_menu(&self.assets);
