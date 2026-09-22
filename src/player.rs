@@ -216,7 +216,9 @@ impl Player {
             self.attack_timer -= dt;
         }
 
-        let is_firearm = self.weapon == Weapon::Pistol || self.weapon == Weapon::Rifle;
+        let is_firearm = self.weapon == Weapon::Pistol
+            || self.weapon == Weapon::Rifle
+            || self.weapon == Weapon::Shotgun;
         let can_shoot = !is_firearm || self.ammo > 0;
         let cooldown_ready = self.shoot_cooldown <= 0.0 && self.attack_timer <= 0.0;
 
@@ -230,22 +232,39 @@ impl Player {
 
             if is_firearm && self.ammo > 0 {
                 let dir = input.aim_world_pos - self.pos;
-                bullets.push(Bullet::new(self.pos, dir, BulletOwner::Player));
-                *last_shot_pos = Some(self.pos);
 
-                self.shoot_cooldown = match self.weapon {
-                    Weapon::Rifle => RIFLE_CD,
-                    Weapon::Pistol => PISTOL_CD,
-                    _ => 0.0,
-                };
+                if self.weapon == Weapon::Shotgun {
+                    let pellets = 6;
+                    let spread_angle = 0.25;
+                    let base_angle = dir.y.atan2(dir.x);
 
-                self.ammo = self.ammo.saturating_sub(1);
+                    for i in 0..pellets {
+                        let offset = (i as f32 / (pellets - 1) as f32 - 0.5) * spread_angle;
+                        let angle = base_angle + offset;
+                        let pellet_dir = vec2(angle.cos(), angle.sin());
+                        bullets.push(Bullet::new(self.pos, pellet_dir, BulletOwner::Player));
+                    }
 
-                match self.weapon {
-                    Weapon::Rifle => audio.play(&audio.sound_ak47),
-                    Weapon::Pistol => audio.play(&audio.sound_pistol),
-                    _ => {}
+                    audio.play(&audio.sound_shotgun);
+                    self.shoot_cooldown = SHOTGUN_CD;
+                } else {
+                    bullets.push(Bullet::new(self.pos, dir, BulletOwner::Player));
+
+                    self.shoot_cooldown = match self.weapon {
+                        Weapon::Rifle => RIFLE_CD,
+                        Weapon::Pistol => PISTOL_CD,
+                        _ => 0.0,
+                    };
+
+                    match self.weapon {
+                        Weapon::Rifle => audio.play(&audio.sound_ak47),
+                        Weapon::Pistol => audio.play(&audio.sound_pistol),
+                        _ => {}
+                    }
                 }
+
+                *last_shot_pos = Some(self.pos);
+                self.ammo = self.ammo.saturating_sub(1);
             } else if !is_firearm {
                 self.attack_timer = MELEE_ATTACK_TIME;
                 audio.play(&audio.sound_swosh);

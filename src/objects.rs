@@ -13,6 +13,7 @@ pub enum Weapon {
     Knife,
     Pistol,
     Rifle,
+    Shotgun,
     Dead,
 }
 
@@ -24,6 +25,7 @@ impl Weapon {
             Weapon::Knife => (KNIFE_ROW, KNIFE_FRAMES, 12.0),
             Weapon::Pistol => (PISTOL_ROW, PISTOL_FRAMES, 12.0),
             Weapon::Rifle => (RIFLE_ROW, RIFLE_FRAMES, 14.0),
+            Weapon::Shotgun => (SHOTGUN_ROW, SHOTGUN_FRAMES, 12.0),
             Weapon::Dead => (DEAD_ROW, DEAD_FRAMES, 14.0),
         }
     }
@@ -32,6 +34,7 @@ impl Weapon {
         match *self {
             Weapon::Rifle => 30,
             Weapon::Pistol => 12,
+            Weapon::Shotgun => 6,
             _ => 0,
         }
     }
@@ -157,6 +160,7 @@ impl DroppedWeapon {
             Weapon::Knife => 1.0,
             Weapon::Pistol => 2.0,
             Weapon::Rifle => 3.0,
+            Weapon::Shotgun => 4.0,
             _ => return,
         };
 

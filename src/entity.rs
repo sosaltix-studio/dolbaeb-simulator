@@ -43,6 +43,9 @@ pub const PISTOL_FRAMES: usize = 2;
 pub const RIFLE_ROW: usize = 4;
 pub const RIFLE_FRAMES: usize = 2;
 
+pub const SHOTGUN_ROW: usize = 5;
+pub const SHOTGUN_FRAMES: usize = 2;
+
 // Ноги
 pub const LEGS_ROW: usize = 6;
 pub const LEGS_FRAMES: usize = 14;
@@ -65,6 +68,7 @@ pub const EXECUTE_KNIFE_FRAMES: usize = 5;
 pub const ATTACK_RADIUS: f32 = 100.0;
 pub const RIFLE_CD: f32 = 0.1;
 pub const PISTOL_CD: f32 = 0.3;
+pub const SHOTGUN_CD: f32 = 0.6;
 pub const MELEE_ATTACK_TIME: f32 = 0.2;
 
 // Структура анимаций
@@ -176,6 +180,7 @@ pub fn char_die(
         let ammo = match weapon {
             Weapon::Pistol => 12,
             Weapon::Rifle => 30,
+            Weapon::Shotgun => 6,
             _ => 0,
         };
 

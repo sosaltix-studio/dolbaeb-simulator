@@ -172,6 +172,7 @@ impl Enemy {
                             let ammo = match self.weapon {
                                 Weapon::Pistol => 12,
                                 Weapon::Rifle => 30,
+                                Weapon::Shotgun => 6,
                                 _ => 0,
                             };
                             dropped_weapons.push(DroppedWeapon::new(
@@ -374,24 +375,39 @@ impl Enemy {
                         let move_vec = move_dir * self.speed * dt;
                         move_char(&mut self.pos, move_vec, active_map);
                     }
-
                     if self.shoot_cooldown <= 0.0
                         && self.reaction_timer <= 0.0
                         && is_aimed
                         && active_map.has_line_of_sight(self.pos, player.pos)
                     {
                         self.is_attacking = true;
-                        match self.weapon {
-                            Weapon::Rifle => audio.play(&audio.sound_ak47),
-                            Weapon::Pistol => audio.play(&audio.sound_pistol),
-                            _ => {}
-                        }
-                        bullets.push(Bullet::new(self.pos, dir_to_player, BulletOwner::Enemy));
 
-                        self.shoot_cooldown = match self.weapon {
-                            Weapon::Rifle => RIFLE_CD,
-                            _ => PISTOL_CD,
-                        };
+                        if self.weapon == Weapon::Shotgun {
+                            let pellets = 5;
+                            let spread_angle = 0.3;
+                            let base_angle = dir_to_player.y.atan2(dir_to_player.x);
+
+                            for i in 0..pellets {
+                                let offset = (i as f32 / (pellets - 1) as f32 - 0.5) * spread_angle;
+                                let angle = base_angle + offset;
+                                let pellet_dir = vec2(angle.cos(), angle.sin());
+                                bullets.push(Bullet::new(self.pos, pellet_dir, BulletOwner::Enemy));
+                            }
+                            audio.play(&audio.sound_shotgun);
+                            self.shoot_cooldown = SHOTGUN_CD;
+                        } else {
+                            match self.weapon {
+                                Weapon::Rifle => audio.play(&audio.sound_ak47),
+                                Weapon::Pistol => audio.play(&audio.sound_pistol),
+                                _ => {}
+                            }
+                            bullets.push(Bullet::new(self.pos, dir_to_player, BulletOwner::Enemy));
+
+                            self.shoot_cooldown = match self.weapon {
+                                Weapon::Rifle => RIFLE_CD,
+                                _ => PISTOL_CD,
+                            };
+                        }
                     }
                 } else if let Some(target_pos) = self.last_known_pos {
                     self.is_attacking = false;
@@ -456,7 +472,7 @@ impl Enemy {
 
     pub fn chase_state(&mut self) {
         self.state = match self.weapon {
-            Weapon::Rifle | Weapon::Pistol => EnemyState::RangedChase,
+            Weapon::Rifle | Weapon::Pistol | Weapon::Shotgun => EnemyState::RangedChase,
             _ => EnemyState::MeleeChase,
         }
     }

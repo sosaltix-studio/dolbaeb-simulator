@@ -33,7 +33,7 @@ impl Level {
                 enemies: vec![
                     Enemy::new(vec2(342.0, 900.0), Weapon::Pipe, vec2(1.0, 0.0)),
                     Enemy::new(vec2(540.0, 360.0), Weapon::Knife, vec2(0.0, 1.0)),
-                    Enemy::new(vec2(990.0, 220.0), Weapon::Pistol, vec2(0.0, 0.0)),
+                    Enemy::new(vec2(990.0, 220.0), Weapon::Shotgun, vec2(0.0, 0.0)),
                     Enemy::new(vec2(990.0, 855.0), Weapon::Pipe, vec2(1.0, 0.0)),
                     Enemy::new(vec2(1620.0, 108.0), Weapon::Knife, vec2(0.0, 1.0)),
                     Enemy::new(vec2(1440.0, 540.0), Weapon::Rifle, vec2(0.0, 0.0)),
@@ -43,8 +43,8 @@ impl Level {
                 ],
                 dropped_weapons: vec![DroppedWeapon::new(
                     vec2(250.0, 200.0),
-                    Weapon::Rifle,
-                    30,
+                    Weapon::Shotgun,
+                    6,
                     0.0,
                 )],
                 exit_trigger: Rect::new(750.0, 100.0, 80.0, 80.0),

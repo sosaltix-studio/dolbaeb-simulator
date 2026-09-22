@@ -6,6 +6,7 @@ pub struct AudioManager {
     pub sound_pipe: Sound,
     pub sound_pistol: Sound,
     pub sound_swosh: Sound,
+    pub sound_shotgun: Sound,
     pub volume: f32,
 }
 
@@ -26,6 +27,9 @@ impl AudioManager {
         let sound_swosh = load_sound_from_bytes(include_bytes!("../assets/swosh.wav"))
             .await
             .unwrap();
+        let sound_shotgun = load_sound_from_bytes(include_bytes!("../assets/shotgun.wav"))
+            .await
+            .unwrap();
 
         Self {
             sound_ak47,
@@ -33,6 +37,7 @@ impl AudioManager {
             sound_pipe,
             sound_pistol,
             sound_swosh,
+            sound_shotgun,
             volume: 0.5,
         }
     }

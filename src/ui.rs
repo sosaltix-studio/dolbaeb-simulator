@@ -327,7 +327,10 @@ fn draw_ui_text(font: &Font, text: &str, x: f32, y: f32, font_size: u16, color: 
 }
 
 pub fn draw_ui(assets: &Assets, player: &Player) {
-    if matches!(player.weapon, Weapon::Pistol | Weapon::Rifle) {
+    if matches!(
+        player.weapon,
+        Weapon::Pistol | Weapon::Rifle | Weapon::Shotgun
+    ) {
         set_default_camera();
         let ammo_text = format!("AMMO: {}", player.ammo);
         draw_ui_text(
