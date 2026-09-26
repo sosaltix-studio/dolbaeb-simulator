@@ -5,6 +5,7 @@ use crate::camera::CameraManager;
 use crate::enemy::{Enemy, alert_enemies};
 use crate::input::{GameInput, VirtualCursor, collect_input};
 use crate::level::{Level, handle_location_switch};
+use crate::lighting::LightingManager;
 use crate::objects::{Bullet, DroppedWeapon, update_bullets};
 use crate::player::Player;
 use crate::tilemap::{MapId, WorldManager};
@@ -15,6 +16,7 @@ pub struct Game {
     pub assets: Assets,
     pub world_manager: WorldManager,
     pub audio_manager: AudioManager,
+    pub lighting_manager: LightingManager,
     pub player: Player,
     pub enemies: Vec<Enemy>,
     pub current_level: Level,
@@ -37,6 +39,7 @@ impl Game {
             assets: Assets::load().await,
             world_manager: WorldManager::init(SCALE),
             audio_manager: AudioManager::load().await,
+            lighting_manager: LightingManager::new(),
             player,
             enemies: current_level.enemies.clone(),
             current_level,
@@ -170,11 +173,15 @@ impl Game {
             }
             self.player.draw(&self.assets);
 
+            self.lighting_manager.draw(&self.camera_manager.camera);
+
             self.camera_manager.end_render();
 
             set_default_camera();
 
             draw_ui(&self.assets, &self.player);
+
+            self.ui_manager.draw(&self.assets);
 
             if self.player.is_dead {
                 draw_dead_menu(&self.assets);
