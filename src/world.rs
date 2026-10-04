@@ -173,11 +173,16 @@ impl Game {
             }
             self.player.draw(&self.assets);
 
-            self.lighting_manager.draw(&self.camera_manager.camera);
-
             self.camera_manager.end_render();
 
             set_default_camera();
+
+            self.lighting_manager.draw(
+                &self.camera_manager.camera,
+                &self.world_manager.get_active().static_lights,
+                self.player.pos,
+                &self.bullets,
+            );
 
             draw_ui(&self.assets, &self.player);
 

@@ -1,4 +1,8 @@
 use crate::SCALE;
+use crate::lighting::{
+    Light, MAP_STATIC_LIGHT_COLOR, MAP_STATIC_LIGHT_FLICKER, MAP_STATIC_LIGHT_INTENSITY,
+    MAP_STATIC_LIGHT_RADIUS, lamp,
+};
 use macroquad::prelude::*;
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;
@@ -34,6 +38,7 @@ pub struct TilemapManager {
     inv_cell_w: f32,
     inv_cell_h: f32,
     last_target_tile: (usize, usize),
+    pub static_lights: Vec<Light>,
 }
 
 impl TilemapManager {
@@ -112,6 +117,36 @@ impl TilemapManager {
             }
         }
 
+        let mut static_lights: Vec<Light> = Vec::new();
+        if let Ok(tiled_json) = serde_json::from_str::<serde_json::Value>(config.json_str) {
+            if let Some(layers) = tiled_json["layers"].as_array() {
+                for layer in layers {
+                    let name = layer["name"].as_str().unwrap_or("");
+                    if name.eq_ignore_ascii_case("Lighting") || name.eq_ignore_ascii_case("Lights")
+                    {
+                        if let Some(data) = layer["data"].as_array() {
+                            for (index, val) in data.iter().enumerate() {
+                                let tile_id = val.as_u64().unwrap_or(0);
+                                if tile_id != 0 && index < grid_len {
+                                    let x = index % config.width;
+                                    let y = index / config.width;
+                                    let pos_x = (x as f32 + 0.5) * config.tile_w * scale;
+                                    let pos_y = (y as f32 + 0.5) * config.tile_h * scale;
+                                    static_lights.push(lamp(
+                                        Vec2::new(pos_x, pos_y),
+                                        MAP_STATIC_LIGHT_RADIUS,
+                                        MAP_STATIC_LIGHT_COLOR,
+                                        MAP_STATIC_LIGHT_INTENSITY,
+                                        MAP_STATIC_LIGHT_FLICKER,
+                                    ));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         Self {
             bg_texture,
             map_rect,
@@ -124,6 +159,7 @@ impl TilemapManager {
             inv_cell_w,
             inv_cell_h,
             last_target_tile: (usize::MAX, usize::MAX),
+            static_lights,
         }
     }
 

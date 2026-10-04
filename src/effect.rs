@@ -100,7 +100,7 @@ impl TripEffect {
         trail_cam.render_target = Some(self.trail_target.clone());
         set_camera(&trail_cam);
 
-        let fade_alpha = 0.5 - (0.96 * self.intensity);
+        let fade_alpha = 0.5 - (0.96 * self.intensity).clamp(0.0, 1.0);
 
         draw_rectangle(
             0.0,
